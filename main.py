@@ -57,14 +57,8 @@ while runner:
 
                             phrase += text_from_bits(bits)
 
-                    print bits
-                    print "Carpi said: " + phrase
-                    
-            #sys.stdout.write(bits+"\n")
-            #sys.stdout.write("Carpi said: " + phrase+"\n")
-            #sys.stdout.write("\r")
-            #sys.stdout.flush()
-            #print "\r"+phrase
+            print bits
+            print "Carpi said: " + phrase
 
             count = 0
             bits = ""
