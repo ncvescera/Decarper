@@ -34,7 +34,6 @@ row = 0
 
 #variabili per stampa formattata
 bit_out = ""
-carpi_out ="Carpi said: "
 
 while runner:
     try:
@@ -62,12 +61,11 @@ while runner:
 
             #formattazione dell'output
             os.system('clear')
-            
-            bit_out += bits + "\n"
-            carpi_out += text_from_bits(bits)
+
+            bit_out += bits + "\t"+ text_from_bits(bits) +"\n"
 
             print bit_out
-            print carpi_out
+            print "Carpi said: " + phrase
 
             count = 0
             bits = ""
