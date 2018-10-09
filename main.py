@@ -1,4 +1,4 @@
-#!/usr/bin/
+#!/usr/bin/python
 '''
     Silence is -36, no sound -80, max sound 0
     -20 is more less a talking person [shoud test this]
@@ -9,6 +9,7 @@ import analyse
 import sys
 import time
 import datetime
+import os
 
 from decoding import *
 
@@ -29,12 +30,14 @@ count = 0       #count number of bits
 bits = ""       #final 8bit string
 phrase = ""     #la frase di carpi che viene aggiornata runtime
 tres = -20      #treshold
+row = 0
+
+#variabili per stampa formattata
+bit_out = ""
 
 while runner:
     try:
             while count < 7:
-                time.sleep(0.1)
-
                 stream.start_stream()
                 rawsamps = stream.read(1024)
                 samps = numpy.fromstring(rawsamps, dtype=numpy.int16)
@@ -54,10 +57,14 @@ while runner:
                         if bits == "1111111":
                             phrase += "!"
                         else:
-
                             phrase += text_from_bits(bits)
 
-            print bits
+            #formattazione dell'output
+            os.system('clear')
+
+            bit_out += bits + "\t"+ text_from_bits(bits) +"\n"
+
+            print bit_out
             print "Carpi said: " + phrase
 
             count = 0
