@@ -9,92 +9,85 @@ import analyse
 import sys
 import time
 import datetime
-
-from asciimatics.screen import Screen
+import os
 
 from decoding import *
 
-def demo(screen):
-    # Initialize PyAudio
-    pyaud = pyaudio.PyAudio()
+# Initialize PyAudio
+pyaud = pyaudio.PyAudio()
 
-    # Open input stream, 16-bit mono at 44100 Hz
-    # On my system, device 2 is a USB microphone, your number may differ.
-    stream = pyaud.open(
-        format = pyaudio.paInt16,
-        channels = 1,
-        rate = 44100,
-        input_device_index = 0,
-        input = True)
+# Open input stream, 16-bit mono at 44100 Hz
+# On my system, device 2 is a USB microphone, your number may differ.
+stream = pyaud.open(
+    format = pyaudio.paInt16,
+    channels = 1,
+    rate = 44100,
+    input_device_index = 0,
+    input = True)
 
-    runner = True   #contro variable for Loop
-    count = 0       #count number of bits
-    bits = ""       #final 8bit string
-    phrase = ""     #la frase di carpi che viene aggiornata runtime
-    tres = -20      #treshold
-    row = 0
+runner = True   #contro variable for Loop
+count = 0       #count number of bits
+bits = ""       #final 8bit string
+phrase = ""     #la frase di carpi che viene aggiornata runtime
+tres = -20      #treshold
+row = 0
 
-    while runner:
-        try:
-                while count < 7:
-                    screen.print_at("Carpi said: "+phrase, 0, screen.height-1)
-                    screen.refresh()
+#variabili per stampa formattata
+bit_out = ""
+carpi_out ="Carpi said: "
 
-                    stream.start_stream()
-                    rawsamps = stream.read(1024)
-                    samps = numpy.fromstring(rawsamps, dtype=numpy.int16)
-                    sound = analyse.loudness(samps)
-                    stream.stop_stream()
+while runner:
+    try:
+            while count < 7:
+                stream.start_stream()
+                rawsamps = stream.read(1024)
+                samps = numpy.fromstring(rawsamps, dtype=numpy.int16)
+                sound = analyse.loudness(samps)
+                stream.stop_stream()
 
-                    if sound > tres:
-                        bits += "1"
-                    else:
-                        bits += "0"
-
-                    count += 1
-                    if(count == 7):
-                        if bits == "0000000":
-                            phrase += " "
-                        else:
-                            if bits == "1111111":
-                                phrase += "!"
-                            else:
-
-                                phrase += text_from_bits(bits)
-
-                screen.print_at(bits,0,row)
-                screen.print_at("Carpi said: "+phrase, 0, screen.height-1)
-
-                if row == screen.height -1:
-                    row = 0
-                    screen.clear()
+                if sound > tres:
+                    bits += "1"
                 else:
-                    row += 1
-                    #time.sleep(0.1)
+                    bits += "0"
 
-                screen.refresh()
+                count += 1
+                if(count == 7):
+                    if bits == "0000000":
+                        phrase += " "
+                    else:
+                        if bits == "1111111":
+                            phrase += "!"
+                        else:
+                            phrase += text_from_bits(bits)
 
-                count = 0
-                bits = ""
+            #formattazione dell'output
+            os.system('clear')
+            
+            bit_out += bits + "\n"
+            carpi_out += text_from_bits(bits)
 
-        except KeyboardInterrupt:
-            runner = False  #stop script while pressing ctrl + c
+            print bit_out
+            print carpi_out
 
-    #Writing log
-    file = open("log","a")
+            count = 0
+            bits = ""
 
-    data = datetime.datetime.now()
-    file.write("Message from Carpi to Earth - " + str(data) + "\n")
-    file.write(phrase)
-    file.write("\n\n")
+    except KeyboardInterrupt:
+        runner = False  #stop script while pressing ctrl + c
 
-    file.close()
+#Writing log
+file = open("log","a")
 
-    # stop stream
-    stream.stop_stream()
-    stream.close()
+data = datetime.datetime.now()
+file.write("Message from Carpi to Earth - " + str(data) + "\n")
+file.write(phrase)
+file.write("\n\n")
 
-    # close PyAudio
-    pyaud.terminate()
+file.close()
 
-Screen.wrapper(demo)
+# stop stream
+stream.stop_stream()
+stream.close()
+
+# close PyAudio
+pyaud.terminate()
