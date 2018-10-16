@@ -30,58 +30,48 @@ count = 0       #count number of bits
 bits = ""       #final 8bit string
 phrase = ""     #la frase di carpi che viene aggiornata runtime
 tres = -20      #treshold
-row = 0
-
-#variabili per stampa formattata
-bit_out = ""
+in_loop = ""    #server per formattare l'output
 
 while runner:
     try:
-            while count < 7:
-                stream.start_stream()
-                rawsamps = stream.read(1024)
-                samps = numpy.fromstring(rawsamps, dtype=numpy.int16)
-                sound = analyse.loudness(samps)
-                stream.stop_stream()
+        stream.start_stream()
+        rawsamps = stream.read(1024)
+        samps = numpy.fromstring(rawsamps, dtype=numpy.int16)
+        sound = analyse.loudness(samps)
+        stream.stop_stream()
 
-                if sound > tres:
-                    bits += "1"
+        os.system('clear')
+
+        if sound > tres:
+            bits += "1"
+            in_loop += "1"
+        else:
+            bits += "0"
+            in_loop += "0"
+
+        print in_loop
+
+        count += 1
+
+        if(count == 7):
+            if bits == "0000000":
+                phrase += " "
+            else:
+                if bits == "1111111":
+                    phrase += "!"
                 else:
-                    bits += "0"
+                    phrase += text_from_bits(bits)
 
-                count += 1
-                if(count == 7):
-                    if bits == "0000000":
-                        phrase += " "
-                    else:
-                        if bits == "1111111":
-                            phrase += "!"
-                        else:
-                            phrase += text_from_bits(bits)
-
-            #formattazione dell'output
-            os.system('clear')
-
-            bit_out += bits + "\t"+ text_from_bits(bits) +"\n"
-
-            print bit_out
-            print "Carpi said: " + phrase
+            in_loop += "\t"+ text_from_bits(bits) +"\n"
 
             count = 0
             bits = ""
 
+        print "Carpi said: " + phrase
+
+        time.sleep(1)
     except KeyboardInterrupt:
         runner = False  #stop script while pressing ctrl + c
-
-#Writing log
-file = open("log","a")
-
-data = datetime.datetime.now()
-file.write("Message from Carpi to Earth - " + str(data) + "\n")
-file.write(phrase)
-file.write("\n\n")
-
-file.close()
 
 # stop stream
 stream.stop_stream()
